@@ -13,8 +13,8 @@ app.post("/books", (req, res) => {
     const { title, author, year } = req.body;
 
     const id = new Date().getTime();
-
-    if (!title || !author || !year) {
+//elimina espacios antes y despues el trim
+    if (!title.trim || !author.trim || !year.trim) {
         return res.status(400).send("Faltan valores");
     }
 
@@ -29,8 +29,7 @@ app.post("/books", (req, res) => {
 
     res.send("Libro creado");
 });
-
-
+//
 app.put("/books/:id")
 
 app.listen(3000, console.log("server en puerto 3000"))
