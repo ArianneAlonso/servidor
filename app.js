@@ -30,7 +30,19 @@ app.post("/books", (req, res) => {
     res.send("Libro creado");
 });
 //
-app.put("/books/:id")
+app.put("/books/:id", (req, res) => {
+    const  id = parseInt(req.params.id);
+    const { title, author, year } = req.body;
+
+    const getBook = db.find((e)=> e.id === id);
+
+    getBook.title = title
+    getBook.author = author
+    getBook.year = year
+    
+    console.log(getBook)
+    res.json("Libro actualizado");
+});
 
 app.listen(3000, console.log("server en puerto 3000"))
 ///////////////////////////////////////////////////////
