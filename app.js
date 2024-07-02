@@ -177,3 +177,81 @@ app.delete("/books/:id", (req, res) => {
 // Inicia el servidor en el puerto 3000
 app.listen(3000, () => console.log("Servidor en puerto 3000"));
 
+////////////felix////////////
+//importar express
+const express = require("express");
+const app = express();
+const database = require("./database")
+const { v4: uuidv4 } = require('uuid');
+
+const generateId = () => {
+    return new Date().getTime()
+}
+
+// middlewares
+app.use(express.json());
+app.use(express.text());
+//mostrar la base de datos en el servidor 
+app.get("/products", (req, res) => {
+    res.json(database)
+
+});
+// mostrar el producto por id
+app.get("/products/:id", (req, res) => {
+    const id = parseInt(req.params.id);  // Convertir el id a un número entero
+    const condicion = product => product.id === id
+    const result = database.find(condicion);  // Buscar el producto por su id
+
+    if (result) {
+        res.json(result);  // Enviar el producto encontrado como respuesta
+    } else {
+        res.status(404).json({ message: "Producto no encontrado" });  // Enviar un mensaje de error si no se encuentra el producto
+    }
+});
+
+
+// agregamos un producto
+app.post("/products", (req, res) => {
+    const id = generateId();
+    const { name, quantity, price } = req.body
+    database.push({
+        id,
+        name,
+        quantity,
+        price
+    });
+    res.send("producto agregado")
+})
+
+//editar un producto
+app.put("/products/:id", (req, res) => {
+    const id = +req.params.id;  // Corrección aquí
+    const { name, quantity, price } = req.body;
+
+    const condicion = (producto) => producto.id == id;
+    const resultado = database.findIndex(condicion);  // Corrección aquí
+
+    if (resultado !== -1) {
+        // Actualizar el producto si se encuentra
+        database[resultado] = { id, name, quantity, price };
+        res.json({ message: "Producto actualizado correctamente"});
+    } else {
+        // Si el producto no se encuentra
+        res.status(404).json({ message: "Producto no encontrado" });
+    }
+    console.log(resultado);  // Corrección aquí
+});
+
+
+//eliminar un producto
+app.delete("/products/:id", (req, res) => {
+    const idProducts = req.params
+    database.splice(idProducts, 1)
+})
+
+
+// se escucha el servidor 
+app.listen(4000, () => {
+    console.log("servidor funcionando en puerto ", 4000);
+});
+
