@@ -255,3 +255,87 @@ app.listen(4000, () => {
     console.log("servidor funcionando en puerto ", 4000);
 });
 
+//////////////felix chatgpt ////////////////
+
+// Importar express
+const express = require("express"); // Importa el módulo de express
+const app = express(); // Crea una instancia de la aplicación de express
+const database = require("./database"); // Importa un módulo de base de datos (asumimos que es un array de productos)
+const { v4: uuidv4 } = require('uuid'); // Importa la función v4 de uuid y la renombra como uuidv4
+
+// Función para generar un ID único basado en la hora actual
+const generateId = () => {
+    return new Date().getTime(); // Devuelve la cantidad de milisegundos desde 1970-01-01
+}
+
+// Middlewares
+app.use(express.json()); // Middleware para analizar cuerpos de solicitud en formato JSON
+app.use(express.text()); // Middleware para analizar cuerpos de solicitud en formato texto
+
+// Mostrar la base de datos en el servidor
+app.get("/products", (req, res) => {
+    res.json(database); // Envía la base de datos completa como respuesta en formato JSON
+});
+
+// Mostrar el producto por ID
+app.get("/products/:id", (req, res) => {
+    const id = parseInt(req.params.id); // Convierte el ID de la URL a un número entero
+    const condicion = product => product.id === id; // Crea una condición para buscar el producto por ID
+    const result = database.find(condicion); // Busca el producto en la base de datos
+
+    if (result) {
+        res.json(result); // Envía el producto encontrado como respuesta
+    } else {
+        res.status(404).json({ message: "Producto no encontrado" }); // Envía un mensaje de error si no se encuentra el producto
+    }
+});
+
+// Agregar un producto
+app.post("/products", (req, res) => {
+    const id = generateId(); // Genera un ID único para el nuevo producto
+    const { name, quantity, price } = req.body; // Extrae el nombre, cantidad y precio del cuerpo de la solicitud
+    database.push({
+        id,
+        name,
+        quantity,
+        price
+    }); // Agrega el nuevo producto a la base de datos
+    res.send("Producto agregado"); // Envía una confirmación como respuesta
+});
+
+// Editar un producto
+app.put("/products/:id", (req, res) => {
+    const id = +req.params.id; // Convierte el ID de la URL a un número entero
+    const { name, quantity, price } = req.body; // Extrae el nombre, cantidad y precio del cuerpo de la solicitud
+
+    const condicion = (producto) => producto.id == id; // Crea una condición para buscar el producto por ID
+    const resultado = database.findIndex(condicion); // Encuentra el índice del producto en la base de datos
+
+    if (resultado !== -1) {
+        // Si se encuentra el producto, se actualiza
+        database[resultado] = { id, name, quantity, price };
+        res.json({ message: "Producto actualizado correctamente"}); // Envía una confirmación como respuesta
+    } else {
+        // Si no se encuentra el producto, se envía un mensaje de error
+        res.status(404).json({ message: "Producto no encontrado" });
+    }
+    console.log(resultado); // Imprime el índice del producto actualizado en la consola
+});
+
+// Eliminar un producto
+app.delete("/products/:id", (req, res) => {
+    const id = parseInt(req.params.id); // Convierte el ID de la URL a un número entero
+    const index = database.findIndex(product => product.id === id); // Encuentra el índice del producto a eliminar
+
+    if (index !== -1) {
+        database.splice(index, 1); // Elimina el producto de la base de datos
+        res.json({ message: "Producto eliminado correctamente" }); // Envía una confirmación como respuesta
+    } else {
+        res.status(404).json({ message: "Producto no encontrado" }); // Envía un mensaje de error si no se encuentra el producto
+    }
+});
+
+// Escuchar el servidor
+app.listen(4000, () => {
+    console.log("Servidor funcionando en puerto", 4000); // Imprime un mensaje en la consola cuando el servidor está funcionando
+});
