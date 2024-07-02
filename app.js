@@ -6,8 +6,20 @@ app.use(express.json())
 
 let libros = []
 
-app.get("/books")
-app.get("/books/:id")
+app.get("/books", (req, res)=>{
+
+    res.json(libros)
+})
+app.get("/books/:id", (req, res)=>{
+
+    const { id }= req.params
+
+    const book = libros.find(elemento => elemento.id === id)
+
+    if (!book) return res.sendstatus(204)
+
+    res.json(book)
+})
 
 app.post("/books", (req, res) => {
     const { title, author, year } = req.body;
