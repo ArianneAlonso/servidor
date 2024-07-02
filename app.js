@@ -46,15 +46,24 @@ app.put("/books/:id", (req, res) => {
     const  id = parseInt(req.params.id);
     const { title, author, year } = req.body;
 
-    const getBook = db.find((e)=> e.id === id);
+    //const getBook = db.find((e)=> e.id === id);
+    //getBook.title = title
+    //getBook.author = author
+    //getBook.year = year
+    //console.log(getBook)
+    //res.json("Libro actualizado");
 
-    getBook.title = title
-    getBook.author = author
-    getBook.year = year
-    
-    console.log(getBook)
-    res.json("Libro actualizado");
+    const index = libros.findIndex( elemento => elemento.id === +id )
+    libros[index] = {
+        title,
+        author,
+        year
+    }
 });
+
+app.delete("/books/:id", (req, res)=>{
+
+})
 
 app.listen(3000, console.log("server en puerto 3000"))
 ///////////////////////////////////////////////////////
