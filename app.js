@@ -41,7 +41,7 @@ app.post("/books", (req, res) => {
 
     res.send("Libro creado");
 });
-//
+
 app.put("/books/:id", (req, res) => {
     const  id = parseInt(req.params.id);
     const { title, author, year } = req.body;
@@ -66,80 +66,114 @@ app.delete("/books/:id", (req, res)=>{
 })
 
 app.listen(3000, console.log("server en puerto 3000"))
-///////////////////////////////////////////////////////
+///////////////////////////chat gpt////////////////////////////
+
+// Importa el módulo express
 const express = require("express");
 
+// Crea una instancia de una aplicación express
 const app = express();
 
+// Middleware para analizar cuerpos de solicitudes JSON
 app.use(express.json());
 
+// Array para almacenar libros
 let libros = [];
 
+// Ruta GET para obtener todos los libros
 app.get("/books", (req, res) => {
+    // Devuelve el array de libros en formato JSON
     res.json(libros);
 });
 
+// Ruta GET para obtener un libro por su id
 app.get("/books/:id", (req, res) => {
+    // Extrae el parámetro id de la solicitud
     const { id } = req.params;
-    const libro = libros.find(l => l.id === parseInt(id));
 
-    if (!libro) {
-        return res.status(404).send("Libro no encontrado");
-    }
+    // Busca el libro con el id proporcionado
+    const book = libros.find(elemento => elemento.id === parseInt(id));
 
-    res.json(libro);
+    // Si no se encuentra el libro, devuelve el estado 204 (sin contenido)
+    if (!book) return res.sendStatus(204);
+
+    // Devuelve el libro encontrado en formato JSON
+    res.json(book);
 });
 
+// Ruta POST para agregar un nuevo libro
 app.post("/books", (req, res) => {
+    // Extrae el título, autor y año del cuerpo de la solicitud
     const { title, author, year } = req.body;
 
+    // Genera un id único basado en la marca de tiempo actual
     const id = new Date().getTime();
-    // elimina espacios antes y después con trim()
+
+    // Verifica que los campos no estén vacíos después de eliminar espacios en blanco
     if (!title.trim() || !author.trim() || !year.trim()) {
         return res.status(400).send("Faltan valores");
     }
 
+    // Crea un nuevo objeto libro
     const newBook = {
-        id: id,
-        title: title,
-        author: author,
-        year: parseInt(year)
+        id,
+        title,
+        author,
+        year: parseInt(year) // Convierte el año a un número entero
     };
 
+    // Agrega el nuevo libro al array de libros
     libros.push(newBook);
 
+    // Envía una respuesta indicando que el libro fue creado
     res.send("Libro creado");
 });
 
+// Ruta PUT para actualizar un libro por su id
 app.put("/books/:id", (req, res) => {
-    const { id } = req.params;
+    // Convierte el parámetro id a un número entero
+    const id = parseInt(req.params.id);
+    // Extrae el título, autor y año del cuerpo de la solicitud
     const { title, author, year } = req.body;
 
-    const libro = libros.find(l => l.id === parseInt(id));
+    // Encuentra el índice del libro con el id proporcionado
+    const index = libros.findIndex(elemento => elemento.id === id);
 
-    if (!libro) {
-        return res.status(404).send("Libro no encontrado");
-    }
-
-    // Actualizar los valores del libro existente
-    if (title) libro.title = title.trim();
-    if (author) libro.author = author.trim();
-    if (year) libro.year = parseInt(year);
-
-    res.send("Libro actualizado");
-});
-
-app.delete("/books/:id", (req, res) => {
-    const { id } = req.params;
-    const index = libros.findIndex(l => l.id === parseInt(id));
-
+    // Si no se encuentra el libro, devuelve el estado 404 (no encontrado)
     if (index === -1) {
         return res.status(404).send("Libro no encontrado");
     }
 
-    libros.splice(index, 1);
+    // Actualiza el libro con los nuevos datos
+    libros[index] = {
+        id,
+        title,
+        author,
+        year: parseInt(year) // Convierte el año a un número entero
+    };
 
+    // Envía una respuesta indicando que el libro fue actualizado
+    res.send("Libro actualizado");
+});
+
+// Ruta DELETE para eliminar un libro por su id
+app.delete("/books/:id", (req, res) => {
+    // Convierte el parámetro id a un número entero
+    const id = parseInt(req.params.id);
+    // Encuentra el índice del libro con el id proporcionado
+    const index = libros.findIndex(elemento => elemento.id === id);
+
+    // Si no se encuentra el libro, devuelve el estado 404 (no encontrado)
+    if (index === -1) {
+        return res.status(404).send("Libro no encontrado");
+    }
+
+    // Elimina el libro del array de libros
+    libros.splice(index, 1);
+    // Envía una respuesta indicando que el libro fue eliminado
     res.send("Libro eliminado");
 });
 
+// Inicia el servidor en el puerto 3000
 app.listen(3000, () => console.log("Servidor en puerto 3000"));
+
